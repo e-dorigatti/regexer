@@ -88,6 +88,9 @@ namespace regexer {
             try {
                 this.Pattern = buildFromRanges( pattern ).Replace( "\\", string.Empty );
             }
+            catch ( ParsingException ex ) {
+                throw;
+            }
             catch ( Exception ex ) {
                 throw new ParsingException( "invalid pattern: " + pattern, ex );
             }

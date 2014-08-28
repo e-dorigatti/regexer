@@ -62,6 +62,9 @@ namespace regexer {
             try {
                 buildQuantifier( content );
             }
+            catch ( ParsingException ex ) {
+                throw;
+            }
             catch ( Exception ex ) {
                 throw new ParsingException( "invalid quantifier " + content, ex );
             }

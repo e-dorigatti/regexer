@@ -14,9 +14,17 @@ namespace regexer {
          *  \return The root of the tree.
          */
         public static Token Tokenize( string pattern ) {
-            IEnumerable<Token> tokens = findTokens( pattern );
-            GroupToken root = regroupTokens( tokens );
-            return convertToPrefixOrs( root );
+            try {
+                IEnumerable<Token> tokens = findTokens( pattern );
+                GroupToken root = regroupTokens( tokens );
+                return convertToPrefixOrs( root );
+            }
+            catch ( ParsingException ex ) {
+                throw;
+            }
+            catch ( Exception ex ) {
+                throw new ParsingException( "invalid pattern: " + pattern, ex );
+            }
         }
 
 

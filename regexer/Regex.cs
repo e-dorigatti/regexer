@@ -12,7 +12,16 @@ namespace regexer {
 
         public Regex( string pattern ) {
             this.Pattern = pattern;
-            this._root = Token.Tokenize( pattern );
+
+            try {
+                this._root = Token.Tokenize( pattern );
+            }
+            catch ( ParsingException ex ) {
+                throw;
+            }
+            catch ( Exception ex ) {
+                throw new ParsingException( "invalid pattern: " + pattern, ex );
+            }
         }
 
         public IEnumerable<string> Matches( string input ) {
