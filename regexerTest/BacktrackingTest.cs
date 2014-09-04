@@ -28,6 +28,7 @@ namespace regexerTest {
 
         [TestMethod]
         public void GroupTokenBacktrackingTest( ) { 
+            // this assumes quantifier tokens backtrack correctly
             string pattern = @"(ab+)(ba+)(ab+)", input = "aaabbbaaabbbaaa";
 
             var rex = new Regex( pattern );

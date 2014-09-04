@@ -45,6 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InputEndToken.cs" />
+    <Compile Include="InputStartToken.cs" />
     <Compile Include="LiteralToken.cs" />
     <Compile Include="GroupToken.cs" />
     <Compile Include="OrToken.cs" />

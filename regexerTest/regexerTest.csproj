@@ -60,6 +60,7 @@
     <Compile Include="QuantifierNodeTest.cs" />
     <Compile Include="TokenTest.cs" />
     <Compile Include="BacktrackingTest.cs" />
+    <Compile Include="PositionTokenTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\regexer\regexer.csproj">

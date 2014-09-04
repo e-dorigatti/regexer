@@ -30,6 +30,9 @@ namespace regexer {
 
         /** Extract a plain, unstructured sequence of tokens from the given pattern.
          * 
+         *  When possible, yield tokens of the appropriate subclass; in any case
+         *  Type is set to the appropriate TokenType value.
+         * 
          *  \param pattern The regex pattern.
          *  \return A sequence of tokens.
          */
@@ -78,7 +81,7 @@ namespace regexer {
                         break;
 
                     case '\\':
-                        yield return new Token( TokenType.Literal, pattern.Substring( i, 2 ) );
+                        yield return new LiteralToken( pattern.Substring( i, 2 ) );
                         i += 1;
                         break;
 
@@ -89,11 +92,19 @@ namespace regexer {
                         while ( pattern[ i ] != ']' || pattern[ i - 1 ] == '\\' )
                             i += 1;
 
-                        yield return new Token( TokenType.Literal, pattern.Substring( tokenStart, i - tokenStart ) );
+                        yield return new LiteralToken( pattern.Substring( tokenStart, i - tokenStart ) );
+                        break;
+
+                    case '^':
+                        yield return new InputStartToken( );
+                        break;
+
+                    case '$':
+                        yield return new InputEndToken( );
                         break;
 
                     default: // do not group adjacent characters
-                        yield return new Token( TokenType.Literal, pattern.Substring( i, 1 ) );
+                        yield return new LiteralToken( pattern.Substring( i, 1 ) );
                         break;
                 }
             }
@@ -123,28 +134,31 @@ namespace regexer {
             groups.Push( current );
 
             foreach ( Token t in tokens ) {
-                if ( t.Type == TokenType.GroupStart ) {
-                    var newGroup = new GroupToken( );
-                    current.Content.Add( newGroup );
-                    groups.Push( current );
+                switch ( t.Type ) {
+                    case TokenType.GroupStart:
+                        var newGroup = new GroupToken( );
+                        current.Content.Add( newGroup );
+                        groups.Push( current );
 
-                    current = newGroup;
-                }
-                else if ( t.Type == TokenType.GroupEnd ) {
-                    current = groups.Pop( );
-                }
-                else if ( t.Type == TokenType.Quantifier ) {
-                    Token target = current.Content.Last( );
-                    current.Content.Remove( target );
+                        current = newGroup;
+                        break;
 
-                    var quantifier = new QuantifierToken( t.Text, target );
-                    current.Content.Add( quantifier );
+                    case TokenType.GroupEnd:
+                        current = groups.Pop( );
+                        break;
+
+                    case TokenType.Quantifier:
+                        Token target = current.Content.Last( );
+                        current.Content.Remove( target );
+
+                        var quantifier = new QuantifierToken( t.Text, target );
+                        current.Content.Add( quantifier );
+                        break;
+
+                    default:
+                        current.Content.Add( t );
+                        break;
                 }
-                else if ( t.Type == TokenType.Literal ) {
-                    var literal = new LiteralToken( t.Text );
-                    current.Content.Add( literal );
-                }
-                else current.Content.Add( t );
             }
 
             if ( groups.Count > 1 )

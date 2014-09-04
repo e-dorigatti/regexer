@@ -25,7 +25,10 @@ namespace regexer {
             GroupEnd,       ///< A group ends with this token.
             Group,          ///< This token is a sequence of patterns matched sequentially.
             Or,             ///< This token contains a list of alternative choices.
+            InputStart,     ///< This token matches only if the cursor is at the start of the string.
+            InputEnd,       ///< This token matches only if the cursor is at the end of the string.
         }
+
 
         public TokenType Type { get; set; }     ///< Specifies the type of information represented by this token.
         public string Text { get; set; }        ///< Part of the pattern which this token refers to.
