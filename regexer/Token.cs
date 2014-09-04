@@ -76,7 +76,7 @@ namespace regexer {
          *  backtracking position
          *  \return True if it was possible to backtrack, false otherwise.
          */
-        public virtual bool DoBacktrack( string input, ref int cursor ) {
+        public virtual bool CanBacktrack( string input, ref int cursor ) {
             throw new NotImplementedException( );
         }
 

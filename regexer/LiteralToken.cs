@@ -106,7 +106,7 @@ namespace regexer {
         }
 
 
-        public override bool DoBacktrack( string input, ref int cursor ) {
+        public override bool CanBacktrack( string input, ref int cursor ) {
             return false;
         }
 

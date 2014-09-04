@@ -66,6 +66,10 @@ namespace regexer {
                         while ( pattern[ i ] != '}' )
                             i += 1;
 
+                        // lazy?
+                        if ( i < pattern.Length - 2 && pattern[ i + 1 ] == '?' )
+                            i += 1;
+
                         yield return new Token( TokenType.Quantifier, pattern.Substring( tokenStart, i - tokenStart + 1 ) );
                         break;
 

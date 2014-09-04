@@ -16,9 +16,6 @@ namespace regexer {
 
         public List<Token> Alternatives { get; set; }   ///< List of alternatives; only one needs to appear in the input.
 
-        private int _backtrackingCursor;
-        private int _backtrackingToken;
-
         /** Creates a new OrToken.
          */
         public OrToken( )
@@ -27,25 +24,23 @@ namespace regexer {
             Alternatives = new List<Token>( );
         }
 
+
         public override bool Matches( string input, ref int cursor ) {
-            _backtrackingToken = -1;
-            return DoBacktrack( input, ref cursor );
-        }
+            int start = cursor;
 
-
-        public override bool DoBacktrack( string input, ref int cursor ) {
-            _backtrackingCursor = cursor;
-
-            // we have to increment _backtrackingToken before the loop because
-            // it was not incremented lat time a match was found
-            for ( ++_backtrackingToken ; _backtrackingToken < Alternatives.Count; _backtrackingToken++ ) {
-                Token t = Alternatives[ _backtrackingToken ];
+            for ( int i = 0 ; i < Alternatives.Count; i++ ) {
+                Token t = Alternatives[ i ];
 
                 if ( t.Matches( input, ref cursor ) )
                     return true;
-                else cursor = _backtrackingCursor;
+                else cursor = start;
             }
 
+            return false;
+        }
+
+
+        public override bool CanBacktrack( string input, ref int cursor ) {
             return false;
         }
 

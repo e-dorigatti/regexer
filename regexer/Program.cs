@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace regexer {
     class Program {
         static void Main( string[ ] args ) {
-            string pattern = @"<.*?>", input = "<dd>ss";
+            string pattern = @"a{3}", input = "aaaaab";
 
             var rex = new Regex( pattern );
             Console.WriteLine( rex.ToLISPyString( ) );

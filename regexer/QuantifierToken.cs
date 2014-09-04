@@ -88,7 +88,7 @@ namespace regexer {
                     }
                 }
                 // Since we do not match anymore go back just after the last match (if possible)
-                else return DoBacktrack( input, ref cursor );
+                else return CanBacktrack( input, ref cursor );
             }
 
             cursor = start;
@@ -96,7 +96,7 @@ namespace regexer {
         }
 
 
-        public override bool DoBacktrack( string input, ref int cursor ) {
+        public override bool CanBacktrack( string input, ref int cursor ) {
             if ( !_backtrackingPoints.Any( ) )
                 return false;
 
@@ -146,6 +146,11 @@ namespace regexer {
             else if ( content.StartsWith( "{" ) && content.EndsWith( "}" ) ) {
                 content = content.Substring( 1, content.Length - 2 );
                 string[ ] parts = content.Split( ',' );
+
+                if ( parts.Length == 1 ) {
+                    MinOccurrences = MaxOccurrences = int.Parse( parts[ 0 ] );
+                    return;
+                }
 
                 if ( parts[ 0 ].Length == 0 )
                     MinOccurrences = 0;

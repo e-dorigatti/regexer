@@ -35,7 +35,7 @@ namespace regexer {
         }
 
 
-        public override bool DoBacktrack( string input, ref int cursor ) {
+        public override bool CanBacktrack( string input, ref int cursor ) {
             int i = Content.Count;
 
             if ( findBacktrackToken( input, ref cursor, ref i ) )
@@ -90,7 +90,7 @@ namespace regexer {
             int start = cursor;
 
             while ( --token >= 0 ) {
-                if ( Content[ token ].DoBacktrack( input, ref cursor ) )
+                if ( Content[ token ].CanBacktrack( input, ref cursor ) )
                     return true;
             }
 
