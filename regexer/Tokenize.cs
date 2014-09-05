@@ -19,7 +19,7 @@ namespace regexer {
                 GroupToken root = regroupTokens( tokens );
                 return convertOrs( root );
             }
-            catch ( ParsingException ex ) {
+            catch ( ParsingException ) {
                 throw;
             }
             catch ( Exception ex ) {
@@ -44,7 +44,13 @@ namespace regexer {
 
                 switch ( c ) {
                     case '(':
-                        yield return new Token( TokenType.GroupStart, "(" );
+                        tokenStart = i;
+                        if ( pattern[ i + 1 ] == '?' && pattern[ i + 2 ] == '<' ) {
+                            while ( pattern[ i ] != '>' )
+                                i += 1;
+                        }
+
+                        yield return new Token( TokenType.GroupStart, pattern.Substring( tokenStart, i - tokenStart + 1 ) );
                         break;
 
                     case ')':
@@ -130,15 +136,21 @@ namespace regexer {
         private static GroupToken regroupTokens( IEnumerable<Token> tokens ) {
             int groupCount = 0;
             var groups = new Stack<GroupToken>( );
+            var names = new HashSet<string>( );
 
-            var current = new GroupToken { Index = groupCount++ };
+            var current = new GroupToken( string.Empty, groupCount++ );
             groups.Push( current );
 
             foreach ( Token t in tokens ) {
                 switch ( t.Type ) {
                     case TokenType.GroupStart:
-                        var newGroup = new GroupToken { Index = groupCount++ };
-
+                        var newGroup = new GroupToken( t.Text, groupCount++ );
+                        if ( newGroup.Name != null ) {
+                            if ( names.Contains( newGroup.Name ) )
+                                throw new ParsingException( "multiple groups with the same name are not allowed" );
+                            else names.Add( newGroup.Name );
+                        }
+                        
                         current.Content.Add( newGroup );
                         groups.Push( current );
 

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace regexerTest {
 
     [TestClass( )]
-    public class QuantifierNodeTest {
+    public class QuantifierTokenTest {
         public TestContext TestContext { get; set; }
 
         [TestMethod( )]

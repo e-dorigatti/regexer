@@ -43,5 +43,21 @@ namespace regexerTest {
             Assert.AreEqual( "bb", match.Groups[ 3 ].Value );
             Assert.AreEqual( 3, match.Groups[ 3 ].Index );
         }
+
+        [TestMethod( )]
+        public void RegexNamedGroupsTest( ) {
+            var match = new Regex( "(?<test>a+)" ).Match( "bbaaaa" );
+            
+            Assert.AreEqual( true, match.Success );
+            Assert.AreEqual( 2, match.Groups.Count );
+            Assert.AreEqual( "aaaa", match[ "test" ].Value );
+            Assert.AreEqual( 1, match[ "test" ].Index );
+
+            try {
+                var rex = new Regex( "(?<test>a+)(?<test>b+" );
+                Assert.Fail( "multiple named groups with the same name should not be supported" );
+            }
+            catch ( ParsingException ) { }
+        }
     }
 }

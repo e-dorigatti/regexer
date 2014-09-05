@@ -20,5 +20,21 @@ namespace regexer {
             this.Groups = new List<RegexGroup>( );
             this.Success = success;
         }
+
+
+        /** Returns the matched group with the given name.
+         * 
+         *  Throws InvalidOperationException if not such group exists.
+         */
+        public RegexGroup this[ string name ] {
+            get { return Groups.Single( g => g.Name == name ); }
+        }
+
+
+        /** Returns the matched group with the given index.
+         */
+        public RegexGroup this[ int index ] {
+            get { return Groups[ index ]; }
+        }
     }
 }

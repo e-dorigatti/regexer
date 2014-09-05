@@ -88,7 +88,7 @@ namespace regexer {
             try {
                 this.Pattern = buildFromRanges( pattern ).Replace( "\\", string.Empty );
             }
-            catch ( ParsingException ex ) {
+            catch ( ParsingException ) {
                 throw;
             }
             catch ( Exception ex ) {

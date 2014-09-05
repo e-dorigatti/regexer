@@ -19,7 +19,7 @@ namespace regexer {
             try {
                 this._root = Token.Tokenize( pattern );
             }
-            catch ( ParsingException ex ) {
+            catch ( ParsingException ) {
                 throw;
             }
             catch ( Exception ex ) {

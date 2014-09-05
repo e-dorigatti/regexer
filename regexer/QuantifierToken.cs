@@ -18,6 +18,7 @@ namespace regexer {
      *    - a{,n}    <b>min:</b> 0    <b>max:</b> n
      *    - a{n,}    <b>min:</b> n    <b>max:</b> inf
      *    - a{m, n}  <b>min:</b> m    <b>max:</b> n
+     *    - a{n}     <b>min:</b> n    <b>max:</b> n
      *  
      *  Quantifiers can either be greedy or lazy. A greedy quantifier (the default
      *  behavior) matches the target as many times as possible whereas a lazy
@@ -62,7 +63,7 @@ namespace regexer {
             try {
                 buildQuantifier( content );
             }
-            catch ( ParsingException ex ) {
+            catch ( ParsingException ) {
                 throw;
             }
             catch ( Exception ex ) {

@@ -11,6 +11,10 @@ namespace regexer {
      *  in the specified order in the input string; groups induced by round
      *  brackets are also represented by GroupTokens.
      *  
+     *  When a RegexMatch is found, it will contain a collection of the groups
+     *  found during the match. Groups can be named using the following syntax:
+     *  (?<group-name>pattern).
+     *  
      *  For example,
      *   - The pattern ab+c is compiled to a GroupToken containing three
      *     distinct patterns: a, b+ and c.
@@ -20,7 +24,6 @@ namespace regexer {
      */
     public class GroupToken : Token {
         public List<Token> Content { get; set; }    ///< The content of this group. Order is important.
-        public bool Keep { get; set; }              ///< If this group was inserted by the user we should not remove it.
         public string Name { get; set; }            ///< Optional name if specified in the pattern or null
 
         /** Index of the group in the pattern.
@@ -38,12 +41,25 @@ namespace regexer {
             }
         }
 
+        // used to build the RegexGroup with the info from the last match
         private int _cursor_start;
         private int _cursor_end;
         private string _input;
 
-        /** Create a new GroupToken.
-         */
+
+        public GroupToken( string pattern, int index )
+            : base( TokenType.Group, pattern ) {
+
+            if ( pattern.StartsWith( "(?<" ) && pattern.EndsWith( ">" ) ) {
+                this.Name = pattern.Substring( 3, pattern.Length - 4 );
+                if ( this.Name.Length == 0 )
+                    throw new ParsingException( "empty group name not allowed" );
+            }
+
+            this.Index = index;
+            this.Content = new List<Token>( );
+        }
+
         public GroupToken( )
             : base( TokenType.Group, "()" ) {
 

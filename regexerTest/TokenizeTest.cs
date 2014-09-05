@@ -7,7 +7,7 @@ using System.Linq;
 namespace regexerTest {
 
     [TestClass( )]
-    public class TokenTest {
+    public class TokenizeTest {
 
         [TestMethod( )]
         public void TokenizeOrTokenTest( ) {
