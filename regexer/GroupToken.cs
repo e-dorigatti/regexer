@@ -20,6 +20,27 @@ namespace regexer {
      */
     public class GroupToken : Token {
         public List<Token> Content { get; set; }    ///< The content of this group. Order is important.
+        public bool Keep { get; set; }              ///< If this group was inserted by the user we should not remove it.
+        public string Name { get; set; }            ///< Optional name if specified in the pattern or null
+
+        /** Index of the group in the pattern.
+         * 
+         *  Groups specified in the pattern will have positive indexes starting
+         *  from 1 (0 is the whole match) respecting their order of appearance. 
+         *  Groups added during the processing of the pattern should have a negative
+         *  index so that they will not be shown.
+         */
+        public int Index { get; set; }
+
+        public RegexGroup Match {
+            get {
+                return new RegexGroup( _cursor_start, _cursor_end, _input, Index, Name );
+            }
+        }
+
+        private int _cursor_start;
+        private int _cursor_end;
+        private string _input;
 
         /** Create a new GroupToken.
          */
@@ -27,10 +48,19 @@ namespace regexer {
             : base( TokenType.Group, "()" ) {
 
             Content = new List<Token>( );
+            Index = -1;
+        }
+
+        public GroupToken( List<Token> content )
+            : base( TokenType.Group, "()" ) {
+
+            Index = -1;
+            Content = content;
         }
 
 
         public override bool Matches( string input, ref int cursor ) {
+            this._input = input;
             return matchesFrom( 0, input, ref cursor );
         }
 
@@ -70,6 +100,9 @@ namespace regexer {
                     }
                 }
             }
+
+            this._cursor_start = cursor_start;
+            this._cursor_end = cursor;
 
             return true;
         }

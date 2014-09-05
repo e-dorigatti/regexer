@@ -19,20 +19,22 @@ namespace regexerTest {
 
             foreach ( var p in patterns ) {
                 var rex = new Regex( p.Pattern );
-                var matches = rex.Matches( p.Input ).ToList( );
-                
+                var matches = rex.Matches( p.Input )
+                    .Select( m => m.Value ).ToList( );
+
                 Assert.AreEqual( 1, matches.Count );
                 Assert.AreEqual( p.Result, matches.First( ) );
             }
         }
 
         [TestMethod]
-        public void GroupTokenBacktrackingTest( ) { 
+        public void GroupTokenBacktrackingTest( ) {
             // this assumes quantifier tokens backtrack correctly
             string pattern = @"(ab+)(ba+)(ab+)", input = "aaabbbaaabbbaaa";
 
             var rex = new Regex( pattern );
-            var matches = rex.Matches( input ).ToList( );
+            var matches = rex.Matches( input )
+                .Select( m => m.Value ).ToList( );
 
             Assert.AreEqual( 1, matches.Count );
             Assert.AreEqual( "abbbaaabbb", matches.First( ) );

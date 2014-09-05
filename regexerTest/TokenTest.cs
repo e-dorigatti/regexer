@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace regexerTest {
 
@@ -11,9 +12,13 @@ namespace regexerTest {
         [TestMethod( )]
         public void TokenizeOrTokenTest( ) {
             Token result = Token.Tokenize( "a|a|a|a" );
-            Assert.IsInstanceOfType( result, typeof( OrToken ) );
+            Assert.IsInstanceOfType( result, typeof( GroupToken ) );
 
-            OrToken orToken = result as OrToken;
+            GroupToken group = result as GroupToken;
+            Assert.AreEqual(1, group.Content.Count);
+            Assert.IsInstanceOfType( group.Content.First( ), typeof( OrToken ) );
+
+            OrToken orToken = group.Content.First( ) as OrToken;
             Assert.AreEqual( 4, orToken.Alternatives.Count );
 
             foreach ( Token t in orToken.Alternatives ) {
@@ -71,38 +76,6 @@ namespace regexerTest {
                     string.Format( "pattern: {0}, expected: {1}, actual: {2}",
                     p.Pattern, p.Lazy, quantifier.IsLazy ) );
             }
-        }
-
-        [TestMethod( )]
-        public void TokenizeOperatorPriorityTest( ) {
-            Token root = Token.Tokenize( "(a|bc*)+|x" );
-
-            Assert.IsInstanceOfType( root, typeof( OrToken ) );
-            OrToken orRoot = root as OrToken;
-            Assert.AreEqual( Token.TokenType.Literal, orRoot.Alternatives[ 1 ].Type );
-            Assert.AreEqual( "x", orRoot.Alternatives[ 1 ].Text );
-
-            Assert.IsInstanceOfType( orRoot.Alternatives[ 0 ], typeof( QuantifierToken ) );
-            QuantifierToken quantifier = orRoot.Alternatives[ 0 ] as QuantifierToken;
-            Assert.AreEqual( 1, quantifier.MinOccurrences );
-            Assert.AreEqual( int.MaxValue, quantifier.MaxOccurrences );
-
-            Assert.IsInstanceOfType( quantifier.Target, typeof( OrToken ) );
-            OrToken innerOr = quantifier.Target as OrToken;
-            Assert.AreEqual( Token.TokenType.Literal, innerOr.Alternatives[ 0 ].Type );
-            Assert.AreEqual( "a", innerOr.Alternatives[ 0 ].Text );
-
-            Assert.IsInstanceOfType( innerOr.Alternatives[ 1 ], typeof( GroupToken ) );
-            GroupToken innerGroup = innerOr.Alternatives[ 1 ] as GroupToken;
-            Assert.AreEqual( Token.TokenType.Literal, innerGroup.Content[ 0 ].Type );
-            Assert.AreEqual( "b", innerGroup.Content[ 0 ].Text );
-
-            Assert.IsInstanceOfType( innerGroup.Content[ 1 ], typeof( QuantifierToken ) );
-            QuantifierToken innerQuantifier = innerGroup.Content[ 1 ] as QuantifierToken;
-            Assert.AreEqual( 0, innerQuantifier.MinOccurrences );
-            Assert.AreEqual( int.MaxValue, innerQuantifier.MaxOccurrences );
-            Assert.AreEqual( Token.TokenType.Literal, innerQuantifier.Target.Type );
-            Assert.AreEqual( "c", innerQuantifier.Target.Text );
         }
     }
 }

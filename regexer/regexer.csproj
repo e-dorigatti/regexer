@@ -52,6 +52,8 @@
     <Compile Include="OrToken.cs" />
     <Compile Include="Regex.cs" />
     <Compile Include="QuantifierToken.cs" />
+    <Compile Include="RegexGroup.cs" />
+    <Compile Include="RegexMatch.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="ParsingException.cs" />
     <Compile Include="Program.cs" />

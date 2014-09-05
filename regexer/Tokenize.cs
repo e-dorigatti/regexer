@@ -17,7 +17,7 @@ namespace regexer {
             try {
                 IEnumerable<Token> tokens = findTokens( pattern );
                 GroupToken root = regroupTokens( tokens );
-                return convertToPrefixOrs( root );
+                return convertOrs( root );
             }
             catch ( ParsingException ex ) {
                 throw;
@@ -128,15 +128,17 @@ namespace regexer {
          *  \return An organised tree.
          */
         private static GroupToken regroupTokens( IEnumerable<Token> tokens ) {
+            int groupCount = 0;
             var groups = new Stack<GroupToken>( );
 
-            var current = new GroupToken( );
+            var current = new GroupToken { Index = groupCount++ };
             groups.Push( current );
 
             foreach ( Token t in tokens ) {
                 switch ( t.Type ) {
                     case TokenType.GroupStart:
-                        var newGroup = new GroupToken( );
+                        var newGroup = new GroupToken { Index = groupCount++ };
+
                         current.Content.Add( newGroup );
                         groups.Push( current );
 
@@ -174,84 +176,63 @@ namespace regexer {
          *  in the tree-like structure we are building; we have to convert this
          *  notation to a prefix style, creating an OrToken node in the tree.
          *  
-         *  Since or operators are among the highest precedence operators in regexes
-         *  we can safely replace all the GroupToken nodes which contain at least
-         *  an or operation with an OrToken.
+         *  Or operators have the highest precedence, therefore we can safely replace
+         *  any sequence of tokens which contain an or operator with an OrToken;
+         *  splitting this sequence on or operators yields the list of alternatives
+         *  for the OrToken itself.
          *  
          *  \param root The root of the syntax tree
          *  \return The tree with OrToken nodes inserted at appropriate locations.
-         *  Note that the root of the tree changes type in the process; this happens
-         *  because a GroupToken might be replaced by an OrToken.
          */
-        private static Token convertToPrefixOrs( GroupToken root ) {
-            var orToken = new OrToken( );
-            var current = new GroupToken( );
+        private static Token convertOrs( Token root ) {
+            if ( root is GroupToken ) {
+                var group = root as GroupToken;
+                if ( group.Content.Any( t => t.Type == TokenType.Or ) ) {
+                    var or = new OrToken( );
+                    or.Alternatives = split( group.Content, TokenType.Or )
+                        .Select( l => l.Count > 1 ? new GroupToken( l ) : l.First( ) )
+                        .Select( t => convertOrs( t ) )
+                        .ToList( );
 
-            foreach ( Token t in root.Content ) {
-                if ( t.Type == TokenType.Or ) {
-                    if ( !current.Content.Any( ) )
-                        throw new ParsingException( "invalid or sequence" );
-
-                    orToken.Alternatives.Add( current );
-                    current = new GroupToken( );
+                    group.Content.Clear( );
+                    group.Content.Add( or );
                 }
-                else if ( t.Type == TokenType.Group ) {
-                    Token converted = convertToPrefixOrs( t as GroupToken );
-                    current.Content.Add( converted );
+                else {
+                    group.Content = group.Content
+                        .Select( t => convertOrs( t ) )
+                        .ToList( );
                 }
-                else if ( t.Type == TokenType.Quantifier ) {
-                    var quantifier = t as QuantifierToken;
-                    if ( quantifier.Target is GroupToken )
-                        quantifier.Target = convertToPrefixOrs( quantifier.Target as GroupToken );
-
-                    current.Content.Add( quantifier );
-                }
-                else current.Content.Add( t );
+            }
+            else if ( root is QuantifierToken ) {
+                var quantifier = root as QuantifierToken;
+                quantifier.Target = convertOrs( quantifier.Target );
             }
 
-            if ( !current.Content.Any( ) )
-                throw new ParsingException( "invalid or sequence" );
-
-            orToken.Alternatives.Add( current );
-            return compressToken( orToken );
+            return root;
         }
 
 
-        /** Recursively replace all OrToken / GroupToken which have a single-token content
-         *  with that content.
+        /** Splits a list of tokens; the delimiter is any token with the specified type.
+         * 
+         *  Just like string.Split; the delimiter is not included and empty sub lists
+         *  can be retured.
          *  
-         *  To keep the code simple, some functions might insert OrToken / GroupToken
-         *  whose content consists in only one token; while this is technically
-         *  correct it is also quite unpleasant and might add unnecessary complexity
-         *  to the next stages of the processing. In this case, the token will simply
-         *  be replaced with its content.
-         *  
-         *  \param root The token to compress.
-         *  \return The same token compressed.
+         *  \param tokens The list of tokens to split
+         *  \param type The type of the delimiter tokens
+         *  \returns A sequence of sub lists delimited by tokens of the specified type.
          */
-        private static Token compressToken( Token root ) {
-            List<Token> tokens;
+        private static IEnumerable<List<Token>> split( List<Token> tokens, TokenType type ) {
+            var accumulator = new List<Token>( );
 
-            if ( root is GroupToken )
-                tokens = ( root as GroupToken ).Content;
-            else if ( root is OrToken )
-                tokens = ( root as OrToken ).Alternatives;
-            else return root;
-
-            Token result;
-            if ( tokens.Count == 1 )
-                result = compressToken( tokens.First( ) );
-            else {
-                for ( int i = 0; i < tokens.Count; i++ )
-                    tokens[ i ] = compressToken( tokens[ i ] );
-
-                if ( root is GroupToken )
-                    ( root as GroupToken ).Content = tokens;
-                else ( root as OrToken ).Alternatives = tokens;
-                result = root;
+            foreach ( Token t in tokens ) {
+                if ( t.Type == type ) {
+                    yield return accumulator;
+                    accumulator = new List<Token>( );
+                }
+                else accumulator.Add( t );
             }
 
-            return result;
+            yield return accumulator;
         }
     }
 }

@@ -13,17 +13,21 @@ namespace regexerTest {
         public void TestInputStartToken( ) {
             List<string> matches;
 
-            matches = new Regex( @"^a" ).Matches( "aaaa" ).ToList( );
+            matches = new Regex( @"^a" ).Matches( "aaaa" )
+                .Select(m => m.Value).ToList( );
             Assert.AreEqual( 1, matches.Count );
             Assert.AreEqual( "a", matches.First( ) );
 
-            matches = new Regex( @"a^a" ).Matches( "aaaa" ).ToList( );
+            matches = new Regex( @"a^a" ).Matches( "aaaa" )
+                .Select( m => m.Value ).ToList( );
             Assert.AreEqual( 0, matches.Count );
 
-            matches = new Regex( @"\^a" ).Matches( "aaaa" ).ToList( );
+            matches = new Regex( @"\^a" ).Matches( "aaaa" )
+                .Select( m => m.Value ).ToList( );
             Assert.AreEqual( 0, matches.Count );
 
-            matches = new Regex( @"\^a" ).Matches( "^aaaa" ).ToList( );
+            matches = new Regex( @"\^a" ).Matches( "^aaaa" )
+                .Select( m => m.Value ).ToList( );
             Assert.AreEqual( 1, matches.Count );
             Assert.AreEqual( "^a", matches.First( ) );
         }
@@ -33,17 +37,21 @@ namespace regexerTest {
         public void TestInputEndToken( ) {
             List<string> matches;
 
-            matches = new Regex( @"a$" ).Matches( "aaaa" ).ToList( );
+            matches = new Regex( @"a$" ).Matches( "aaaa" )
+                .Select( m => m.Value ).ToList( );
             Assert.AreEqual( 1, matches.Count );
             Assert.AreEqual( "a", matches.First( ) );
 
-            matches = new Regex( @"a$a" ).Matches( "aa" ).ToList( );
+            matches = new Regex( @"a$a" ).Matches( "aa" )
+                .Select( m => m.Value ).ToList( );
             Assert.AreEqual( 0, matches.Count );
 
-            matches = new Regex( @"\$a" ).Matches( "aaaa" ).ToList( );
+            matches = new Regex( @"\$a" ).Matches( "aaaa" )
+                .Select( m => m.Value ).ToList( );
             Assert.AreEqual( 0, matches.Count );
 
-            matches = new Regex( @"\$a" ).Matches( "$aaaa" ).ToList( );
+            matches = new Regex( @"\$a" ).Matches( "$aaaa" )
+                .Select( m => m.Value ).ToList( );
             Assert.AreEqual( 1, matches.Count );
             Assert.AreEqual( "$a", matches.First( ) );
         }

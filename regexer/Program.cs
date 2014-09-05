@@ -7,13 +7,20 @@ using System.Threading.Tasks;
 namespace regexer {
     class Program {
         static void Main( string[ ] args ) {
-            string pattern = @"a\$", input = "aaaaa$";
+            string pattern = @"((a+)b|(b+)a)+", input = "aabbbaaaab";
 
             var rex = new Regex( pattern );
+            Console.WriteLine( pattern );
             Console.WriteLine( rex.ToLISPyString( ) );
 
-            foreach ( string match in rex.Matches( input ) )
+            foreach ( RegexMatch match in rex.Matches( input ) ) {
                 Console.WriteLine( match );
+
+                foreach ( RegexGroup group in match.Groups ) {
+                    Console.WriteLine( "\tGroup {0}: {1} - {2} \"{3}\"",
+                        group.Index, group.Start, group.End, group );
+                }
+            }
 
             Console.ReadKey( true );
         }

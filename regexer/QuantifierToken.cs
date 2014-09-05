@@ -77,15 +77,15 @@ namespace regexer {
 
             int matches = 0, start = cursor;
             while ( matches <= MaxOccurrences ) {
+
+                if ( matches >= MinOccurrences )
+                    _backtrackingPoints.Push( cursor );
+
                 if ( Target.Matches( input, ref cursor ) ) {
                     matches += 1;
 
-                    if ( matches >= MinOccurrences ) {
-                        _backtrackingPoints.Push( cursor );
-
-                        if ( IsLazy )
-                            return true;
-                    }
+                    if ( IsLazy )
+                        return true;
                 }
                 // Since we do not match anymore go back just after the last match (if possible)
                 else return CanBacktrack( input, ref cursor );
