@@ -47,7 +47,7 @@ namespace regexerTest {
         [TestMethod( )]
         public void RegexNamedGroupsTest( ) {
             var match = new Regex( "(?<test>a+)" ).Match( "bbaaaa" );
-            
+
             Assert.AreEqual( true, match.Success );
             Assert.AreEqual( 2, match.Groups.Count );
             Assert.AreEqual( "aaaa", match[ "test" ].Value );
@@ -58,6 +58,17 @@ namespace regexerTest {
                 Assert.Fail( "multiple named groups with the same name should not be supported" );
             }
             catch ( ParsingException ) { }
+        }
+
+        [TestMethod( )]
+        public void RegexReplaceTest( ) {
+            string input = "CamelCaseShallNotPass",
+                result = "Camel_Case_Shall_Not_Pass";
+
+            var rex = new Regex( "([a-z])([A-Z])" );
+
+            Assert.AreEqual( result, rex.Replace( input, m => m[ 1 ] + "_" + m[ 2 ] ) );
+            Assert.AreEqual( result, rex.Replace( input, "{1}_{2}" ) );
         }
     }
 }
