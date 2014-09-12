@@ -86,7 +86,7 @@ namespace regexer {
                 pattern = pattern.Replace( kvp.Key, kvp.Value );
 
             try {
-                this.Pattern = buildFromRanges( pattern ).Replace( "\\", string.Empty );
+                this.Pattern = buildFromRanges( pattern ).Replace( "\\]", "]" );
             }
             catch ( ParsingException ) {
                 throw;
