@@ -62,6 +62,7 @@
     <Compile Include="TokenizeTest.cs" />
     <Compile Include="BacktrackingTest.cs" />
     <Compile Include="PositionTokenTest.cs" />
+    <Compile Include="LookaroundTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\regexer\regexer.csproj">

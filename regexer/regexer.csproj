@@ -50,6 +50,8 @@
     <Compile Include="InputStartToken.cs" />
     <Compile Include="LiteralToken.cs" />
     <Compile Include="GroupToken.cs" />
+    <Compile Include="LookaheadToken.cs" />
+    <Compile Include="LookbehindToken.cs" />
     <Compile Include="OrToken.cs" />
     <Compile Include="Regex.cs" />
     <Compile Include="QuantifierToken.cs" />

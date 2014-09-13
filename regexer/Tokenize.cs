@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace regexer {
     public partial class Token {
-
+        private const int lookaheadIndex = -2;
+        private const int lookbehindIndex = -3;
 
         /** Build an abstract syntax tree representing the given regex.
          * 
@@ -38,19 +39,49 @@ namespace regexer {
          */
         private static IEnumerable<Token> findTokens( string pattern ) {
             int tokenStart;
+            TokenType type;
 
             for ( int i = 0; i < pattern.Length; i++ ) {
                 char c = pattern[ i ];
 
                 switch ( c ) {
                     case '(':
+                        /* syntax reminder:
+                         *
+                         *  pattern             description             token type 
+                         *  --------------------------------------------------------
+                         *  (pattern)           normal group            groupstart
+                         *  (?<name>pattern)    named group             groupstart
+                         *  (?<=pattern)        positive lookbehind     lookbehind
+                         *  (?<!pattern)        negative lookbehind     lookbehind
+                         *  (?=pattern)         positive lookahead      lookahead
+                         *  (?!pattern)         negative lookahead      lookahead
+                         */
                         tokenStart = i;
-                        if ( pattern[ i + 1 ] == '?' && pattern[ i + 2 ] == '<' ) {
+                        if ( pattern[ i + 1 ] != '?' ) {
+                            type = TokenType.GroupStart;
+                        }
+                        else if ( pattern[ i + 2 ] == '<' &&
+                            ( pattern[ i + 3 ] != '=' && pattern[ i + 3 ] != '!' ) ) {
+
+                            type = TokenType.GroupStart;
+
                             while ( pattern[ i ] != '>' )
                                 i += 1;
                         }
+                        else if ( pattern[ i + 2 ] == '<' &&
+                            ( pattern[ i + 3 ] == '=' || pattern[ i + 3 ] == '!' ) ) {
 
-                        yield return new Token( TokenType.GroupStart, pattern.Substring( tokenStart, i - tokenStart + 1 ) );
+                            type = TokenType.Lookbehind;
+                            i += 3;
+                        }
+                        else if ( pattern[ i + 2 ] == '=' || pattern[ i + 2 ] == '!' ) {
+                            type = TokenType.Lookahead;
+                            i += 2;
+                        }
+                        else throw new ParsingException( "invalid syntax: " + pattern.Substring( i - 2, 6 ) );
+
+                        yield return new Token( type, pattern.Substring( tokenStart, i - tokenStart + 1 ) );
                         break;
 
                     case ')':
@@ -136,13 +167,17 @@ namespace regexer {
         private static GroupToken regroupTokens( IEnumerable<Token> tokens ) {
             int groupCount = 0;
             var groups = new Stack<GroupToken>( );
-            var names = new HashSet<string>( );
+            var names = new HashSet<string>( ); // groups with the same name are not allowed
+            bool insideLookaround = false;      // nested lookarounds are not allowed
+            Token target;
 
             var current = new GroupToken( string.Empty, groupCount++ );
             groups.Push( current );
 
             foreach ( Token t in tokens ) {
                 switch ( t.Type ) {
+
+
                     case TokenType.GroupStart:
                         var newGroup = new GroupToken( t.Text, groupCount++ );
                         if ( newGroup.Name != null ) {
@@ -150,24 +185,71 @@ namespace regexer {
                                 throw new ParsingException( "multiple groups with the same name are not allowed" );
                             else names.Add( newGroup.Name );
                         }
-                        
+
                         current.Content.Add( newGroup );
                         groups.Push( current );
 
                         current = newGroup;
                         break;
 
+
                     case TokenType.GroupEnd:
-                        current = groups.Pop( );
-                        break;
+                        if ( current.Index == lookaheadIndex ) {
+                            insideLookaround = false;
+                            current = groups.Pop( );
+                            break;
+                        }
+                        else if ( current.Index == lookbehindIndex ) {
+                            insideLookaround = false;
+                            var lookbehind = new LookbehindToken( current.Text, current );
+                            current = groups.Pop( );
+                            current.Content.Add( lookbehind );
+                            break;
+                        }
+                        else {
+                            current = groups.Pop( );
+                            break;
+                        }
+
 
                     case TokenType.Quantifier:
-                        Token target = current.Content.Last( );
+                        target = current.Content.Last( );
                         current.Content.Remove( target );
 
                         var quantifier = new QuantifierToken( t.Text, target );
                         current.Content.Add( quantifier );
                         break;
+
+
+                    case TokenType.Lookahead:
+                        if ( insideLookaround )
+                            throw new ParsingException( "nested lookarounds are not allowed" );
+                        insideLookaround = true;
+
+                        /* mark the target as belonging to a lookahead, this will allow us to *
+                         * update insideLookaround when we find the corresponding GroupEnd    */
+                        var lookahead = new LookaheadToken( t.Text,
+                            new GroupToken { Index = lookaheadIndex } );
+
+                        current.Content.Add( lookahead );
+                        groups.Push( current );
+
+                        current = ( GroupToken ) lookahead.Target;
+                        break;
+
+
+                    case TokenType.Lookbehind:
+                        if ( insideLookaround )
+                            throw new ParsingException( "nested lookarounds are not allowed" );
+                        insideLookaround = true;
+
+                        // the actual lookbehind will be created once all its content has been collected
+                        var group = new GroupToken( t.Text, lookbehindIndex );
+                        groups.Push( current );
+
+                        current = group;
+                        break;
+
 
                     default:
                         current.Content.Add( t );

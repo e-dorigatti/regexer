@@ -70,5 +70,20 @@ namespace regexerTest {
             Assert.AreEqual( result, rex.Replace( input, m => m[ 1 ] + "_" + m[ 2 ] ) );
             Assert.AreEqual( result, rex.Replace( input, "{1}_{2}" ) );
         }
+
+        [TestMethod( )]
+        public void RegexZeroWidthMatchesTest( ) {
+            var matches = Regex.Matches( "a*", "abcdef" ).ToList( );
+
+            Assert.AreEqual( 7, matches.Count );
+            Assert.AreEqual( "a", matches[ 0 ].Value );
+            Assert.IsTrue( matches.Skip( 1 ).All( m => m.Value == string.Empty ) );
+            Assert.IsTrue( matches
+                .Select( ( m, i ) => new {
+                    Match = m,
+                    Index = i
+                } )
+                .All( t => t.Match.Start == t.Index ) );
+        }
     }
 }

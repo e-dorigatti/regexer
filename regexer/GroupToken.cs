@@ -32,6 +32,9 @@ namespace regexer {
          *  from 1 (0 is the whole match) respecting their order of appearance. 
          *  Groups added during the processing of the pattern should have a negative
          *  index so that they will not be shown.
+         *  
+         *  Negative indexing can thus be used for "internal" purposes, for example
+         *  for marking special kinds of groups etc.
          */
         public int Index { get; set; }
 
@@ -147,6 +150,12 @@ namespace regexer {
             return false;
         }
 
+
+        public override void Reverse( ) {
+            this.Content.Reverse( );
+            foreach ( Token t in this.Content )
+                t.Reverse( );
+        }
 
         /** String representation of this group token; the tokens contained in
          *  this group are included

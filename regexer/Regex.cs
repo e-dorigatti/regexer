@@ -77,7 +77,8 @@ namespace regexer {
          *  \return A sequence of RegexMatch.
          */
         public IEnumerable<RegexMatch> Matches( string input ) {
-            for ( int i = 0; i < input.Length; i++ ) {
+            // zero width matches can occur right after the last character
+            for ( int i = 0; i <= input.Length; i++ ) {
                 int cursor = i;
 
                 if ( _root.Matches( input, ref cursor ) ) {
@@ -86,9 +87,13 @@ namespace regexer {
 
                     yield return match;
 
-                    i = cursor - 1; // jump over the whole match
-                    // (note that i will be incremented before the next iteration starts, thus we
-                    // have to subract one or we will skip a character)
+                    /* jump over the whole match, but do not take a step back if the match has    *
+                     * length zero (for example the pattern a* matches any string with a zero     *
+                     * length match).                                                             *
+                     *                                                                            *
+                     * (note that i will be incremented before the next iteration starts, thus we *
+                     * have to subract one or we will skip a character)                           */
+                    i = Math.Max( cursor - 1, i );
                 }
             }
         }

@@ -34,11 +34,7 @@ namespace regexer {
      */
     public class LiteralToken : Token {
 
-        //! Possible types of matching.
-        public enum eMatchType {
-            Positive,   ///< Positive matching: the input must be contained in the set of characters.
-            Negative    ///< Negative matching: the input must not be contained in the set of characters.
-        }
+
 
         private static readonly Dictionary<string, string> _charClasses =
             new Dictionary<string, string>( ) { 
@@ -55,8 +51,15 @@ namespace regexer {
             _uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
             _digits = "0123456789";
 
-        public string Pattern { get; private set; }         ///< The set of allowed / disallowed characters 
-        public eMatchType MatchType { get; private set; }   ///< Type of match: positive or negative. 
+
+        public string Pattern { get; private set; }             ///< The set of allowed / disallowed characters 
+
+        /** Whether the characters specified are to be matched or not matched.
+         * 
+         *  If false, all the characters included in Pattern are matched;
+         *  If true, all the characters NOT included in Pattern are matched;
+         */
+        public bool IsNegative { get; set; }
 
         private bool _matchesEverything = false;
 
@@ -76,10 +79,10 @@ namespace regexer {
 
             // positive or negative matching?
             if ( pattern[ 0 ] == '^' ) {
-                MatchType = eMatchType.Negative;
+                IsNegative = true;
                 pattern = pattern.Substring( 1 );
             }
-            else MatchType = eMatchType.Positive;
+            else IsNegative = false;
 
             // replace character classes with their pattern
             foreach ( var kvp in _charClasses )
@@ -184,9 +187,9 @@ namespace regexer {
         public bool Matches( char c ) {
             if ( _matchesEverything )
                 return true;
-            else if ( MatchType == eMatchType.Positive )
-                return Pattern.Contains( c );
-            else return !Pattern.Contains( c );
+            else if ( IsNegative )
+                return !Pattern.Contains( c );
+            else return Pattern.Contains( c );
         }
     }
 }

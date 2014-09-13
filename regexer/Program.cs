@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace regexer {
     class Program {
         static void Main( string[ ] args ) {
-            string pattern = @"(?<test>a+)", input = "aabbbaaaab";
+            string pattern = @"(?<!a)b", input = "abbb";
 
             var rex = new Regex( pattern );
             Console.WriteLine( pattern );

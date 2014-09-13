@@ -27,6 +27,8 @@ namespace regexer {
             Or,             ///< This token contains a list of alternative choices.
             InputStart,     ///< This token matches only if the cursor is at the start of the string.
             InputEnd,       ///< This token matches only if the cursor is at the end of the string.
+            Lookahead,      ///<
+            Lookbehind,     ///<
         }
 
 
@@ -81,6 +83,16 @@ namespace regexer {
          */
         public virtual bool CanBacktrack( string input, ref int cursor ) {
             throw new NotImplementedException( );
+        }
+
+
+        /** Reverse the pattern matched by this token to allow backwards matching.
+         * 
+         *  For example "ab+c" reversed will become "cb+a"; this is useful when implementing
+         *  lookbehinds.
+         */
+        public virtual void Reverse( ) {
+            return;
         }
 
 

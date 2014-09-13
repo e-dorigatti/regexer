@@ -45,6 +45,12 @@ namespace regexer {
         }
 
 
+        public override void Reverse( ) {
+            foreach ( Token t in Alternatives )
+                t.Reverse( );
+        }
+
+
         /** String representation of this token; all the alternatives are included.
          * 
          * \returns The string representation of this token.

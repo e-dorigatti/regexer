@@ -165,6 +165,11 @@ namespace regexer {
         }
 
 
+        public override void Reverse( ) {
+            Target.Reverse( );
+        }
+
+
         /** String representation of this Token, including minumum and maximum occurrences
          *  and the target of the quantifier.
          *  

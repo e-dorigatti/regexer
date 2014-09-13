@@ -24,8 +24,8 @@ namespace regexerTest {
                 Assert.AreEqual( kvp.Value, e.Pattern );
 
                 if ( kvp.Key.StartsWith( "^" ) )
-                    Assert.AreEqual( LiteralToken.eMatchType.Negative, e.MatchType );
-                else Assert.AreEqual( LiteralToken.eMatchType.Positive, e.MatchType );
+                    Assert.AreEqual( true, e.IsNegative );
+                else Assert.AreEqual( false, e.IsNegative );
             }
 
         }
